@@ -8,8 +8,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 class SpotifyConnector:
     def __init__(self) -> None:
         username = "ForgottenLux"
-        client_id = "cb01279821d343e7938689827778f00b"
-        client_secret = "23f3edbbe1ee4dfdad21c434aaf0d706"
+        client_id = ""
+        client_secret = ""
         redirect_uri = "http://localhost:7777/callback"
 
         self._token_top = util.prompt_for_user_token(
