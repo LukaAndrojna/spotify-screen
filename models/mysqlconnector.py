@@ -1,7 +1,7 @@
 import sys
 import datetime
 
-import mysql.connector
+import mariadb
 
 from models.spotifyconnector import SpotifyConnector
 
@@ -14,13 +14,13 @@ def get_genre_id(genre: str) -> int:
     return positive_hash(genre)
 
 
-def delete_tables(db: mysql.connector.connection_cext.CMySQLConnection) -> None:
+def delete_tables(db: mariadb.connections.Connection) -> None:
     cursor = db.cursor()
     cursor.execute("DROP TABLE spotify.history,spotify.tracks,spotify.artists,spotify.genres,spotify.track_artist,spotify.artist_genre;")
     db.commit()
 
 
-def create_tables(db: mysql.connector.connection_cext.CMySQLConnection) -> None:
+def create_tables(db: mariadb.connections.Connection) -> None:
     cursor = db.cursor()
     cursor.execute("CREATE TABLE spotify.history (id VARCHAR(255), track_id VARCHAR(255), played TIMESTAMP)")
     cursor.execute("CREATE TABLE spotify.tracks (track_id VARCHAR(255), title VARCHAR(255), duration INT)")
@@ -31,20 +31,20 @@ def create_tables(db: mysql.connector.connection_cext.CMySQLConnection) -> None:
     db.commit()
 
 
-def get_last_track(db: mysql.connector.connection_cext.CMySQLConnection) -> list:
+def get_last_track(db: mariadb.connections.Connection) -> list:
     cursor = db.cursor()
     cursor.execute("SELECT * FROM history ORDER BY played DESC LIMIT 1")
     return cursor.fetchall()
 
 
-def get_last_played(db: mysql.connector.connection_cext.CMySQLConnection) -> datetime.datetime:
+def get_last_played(db: mariadb.connections.Connection) -> datetime.datetime:
     res = get_last_track(db)
     if len(res) == 0:
         return None
     return res[0][2]
 
 
-def insert_history(db: mysql.connector.connection_cext.CMySQLConnection, rt_list: list) -> None:
+def insert_history(db: mariadb.connections.Connection, rt_list: list) -> None:
     cursor = db.cursor()
     last_played = get_last_played(db)
     rows = list()
@@ -64,7 +64,7 @@ def insert_history(db: mysql.connector.connection_cext.CMySQLConnection, rt_list
     db.commit()
 
 
-def insert_tracks(sc: SpotifyConnector, db: mysql.connector.connection_cext.CMySQLConnection, rt_list: list) -> None:
+def insert_tracks(sc: SpotifyConnector, db: mariadb.connections.Connection, rt_list: list) -> None:
     cursor = db.cursor()
     tracks = list()
     for entry in rt_list:
@@ -95,7 +95,7 @@ def insert_tracks(sc: SpotifyConnector, db: mysql.connector.connection_cext.CMyS
     db.commit()
 
 
-def insert_artists(sc: SpotifyConnector, db: mysql.connector.connection_cext.CMySQLConnection, artists: list) -> None:
+def insert_artists(sc: SpotifyConnector, db: mariadb.connections.Connection, artists: list) -> None:
     cursor = db.cursor()
     artists_query = ",".join([f'"{artist}"' for artist in artists])
     cursor.execute(f"SELECT artist_id FROM spotify.artists WHERE artist_id IN ({artists_query});")
@@ -122,7 +122,7 @@ def insert_artists(sc: SpotifyConnector, db: mysql.connector.connection_cext.CMy
     db.commit()
 
 
-def insert_genres(db: mysql.connector.connection_cext.CMySQLConnection, genres: list) -> None:
+def insert_genres(db: mariadb.connections.Connection, genres: list) -> None:
     if not genres:
         return
 
@@ -144,7 +144,7 @@ def insert_genres(db: mysql.connector.connection_cext.CMySQLConnection, genres: 
     db.commit()
 
 
-def insert_track_artists(db: mysql.connector.connection_cext.CMySQLConnection, track_id: str, artists: list) -> None:
+def insert_track_artists(db: mariadb.connections.Connection, track_id: str, artists: list) -> None:
     cursor = db.cursor()
     rows = list()
     for artist in artists:
@@ -158,7 +158,7 @@ def insert_track_artists(db: mysql.connector.connection_cext.CMySQLConnection, t
     db.commit()
 
 
-def insert_artist_genres(db: mysql.connector.connection_cext.CMySQLConnection, artist_id: str, genres: list) -> None:
+def insert_artist_genres(db: mariadb.connections.Connection, artist_id: str, genres: list) -> None:
     cursor = db.cursor()
     rows = list()
     for genre in genres:

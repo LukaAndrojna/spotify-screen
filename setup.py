@@ -1,4 +1,6 @@
-import mysql.connector
+import argparse
+
+import mariadb
 
 from models.mysqlconnector import create_tables, delete_tables
 
@@ -12,12 +14,13 @@ def main() -> None:
                         const=True, default=False,
                         help=f"Delete tables.")
 
-    db = mysql.connector.connect(
+    db = mariadb.connect(
         host="localhost",
-        user="",
-        password="",
+        user="spotify",
+        password="SpotifyGeslo123!",
         database="spotify"
     )
+
     args = parser.parse_args()
 
     if args.delete:

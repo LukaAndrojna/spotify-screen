@@ -1,4 +1,4 @@
-import mysql.connector
+import mariadb
 
 from models.spotifyconnector import SpotifyConnector
 from models.mysqlconnector import insert_history, insert_tracks
@@ -6,9 +6,9 @@ from models.mysqlconnector import insert_history, insert_tracks
 
 def main() -> None:
     sc = SpotifyConnector()
-    db = mysql.connector.connect(
+    db = mariadb.connect(
         host="localhost",
-        user="andy",
+        user="spotify",
         password="SpotifyGeslo123!",
         database="spotify"
     )
