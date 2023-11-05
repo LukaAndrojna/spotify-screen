@@ -4,32 +4,22 @@ import spotipy
 import spotipy.util as util
 from spotipy.oauth2 import SpotifyClientCredentials
 
+import config
+
 
 class SpotifyConnector:
     def __init__(self) -> None:
-        username = "ForgottenLux"
-        client_id = ""
-        client_secret = ""
-        redirect_uri = "http://localhost:7777/callback"
-
-        self._token_top = util.prompt_for_user_token(
-            username=username, 
-            scope="user-top-read", 
-            client_id=client_id,   
-            client_secret=client_secret,     
-            redirect_uri=redirect_uri
-        )
-
-        self._token_played = util.prompt_for_user_token(
-            username=username, 
-            scope="user-read-recently-played", 
-            client_id=client_id,   
-            client_secret=client_secret,     
-            redirect_uri=redirect_uri
+        self._token = util.prompt_for_user_token(
+            username=config.username, 
+            scope=config.scope,
+            client_id=config.client_id,   
+            client_secret=config.client_secret,     
+            redirect_uri=config.redirect_uri,
+            cache_path=config.cache_path
         )
 
     def get_features(self, track_id: str) -> dict:
-        sp = spotipy.Spotify(auth=self._token_played)
+        sp = spotipy.Spotify(auth=self._token)
         try:
             features = sp.audio_features([track_id])
             return features[0]
@@ -38,7 +28,7 @@ class SpotifyConnector:
 
     def top_tracks(self) -> str:
         headers = {
-            "Authorization": f"Bearer {self._token_top}",
+            "Authorization": f"Bearer {self._token}",
         }
         try:
             response = requests.get(
@@ -52,7 +42,7 @@ class SpotifyConnector:
 
     def recently_played(self) -> str:
         headers = {
-            "Authorization": f"Bearer {self._token_played}",
+            "Authorization": f"Bearer {self._token}",
         }
         try:
             response = requests.get(
@@ -66,7 +56,7 @@ class SpotifyConnector:
 
     def get_track_info(self, track_id: str) -> str:
         headers = {
-            "Authorization": f"Bearer {self._token_played}",
+            "Authorization": f"Bearer {self._token}",
         }
         try:
             response = requests.get(
@@ -80,7 +70,7 @@ class SpotifyConnector:
 
     def get_artist_info(self, artist_id: str) -> str:
         headers = {
-            "Authorization": f"Bearer {self._token_played}",
+            "Authorization": f"Bearer {self._token}",
         }
         try:
             response = requests.get(

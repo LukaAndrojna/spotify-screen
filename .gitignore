@@ -2,3 +2,4 @@ venv/
 */__pycache__
 .cache-ForgottenLux
 .ipynb_checkpoints/
+__pycache__
