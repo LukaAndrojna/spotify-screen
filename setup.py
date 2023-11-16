@@ -1,3 +1,4 @@
+import argparse
 import mysql.connector
 
 from models.mysqlconnector import create_tables, delete_tables
@@ -14,8 +15,8 @@ def main() -> None:
 
     db = mysql.connector.connect(
         host="localhost",
-        user="",
-        password="",
+        user="spotify",
+        password="SpotifyGeslo123!",
         database="spotify"
     )
     args = parser.parse_args()
