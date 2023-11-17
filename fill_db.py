@@ -8,7 +8,7 @@ def main() -> None:
     sc = SpotifyConnector()
     db = mysql.connector.connect(
         host="localhost",
-        user="andy",
+        user="spotify",
         password="SpotifyGeslo123!",
         database="spotify"
     )

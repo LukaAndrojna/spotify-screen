@@ -171,3 +171,78 @@ def insert_artist_genres(db: mysql.connector.connection_cext.CMySQLConnection, a
     rows = ",\n".join(rows)
     cursor.execute(f"INSERT INTO spotify.artist_genre (id, artist_id, genre_id) VALUES\n{rows};")
     db.commit()
+
+
+def get_listening_minutes_daily(db: mysql.connector.connection_cext.CMySQLConnection) -> list:
+    cursor = db.cursor()
+    query = f"""
+        SELECT
+            DATE(played) as date,
+            ROUND(SUM(duration)/60000) as minutes
+        FROM
+            history
+        JOIN
+            tracks
+        ON
+            history.track_id = tracks.track_id
+            AND played > TIMESTAMP('{datetime.date.today() - datetime.timedelta(days=7)}')
+        GROUP BY 1
+        ORDER BY 1"""
+    cursor.execute(query)
+    return [(row[0], int(row[1])) for row in cursor.fetchall()]
+
+
+def get_listening_minutes_weekly(db: mysql.connector.connection_cext.CMySQLConnection) -> int:
+    return sum([row[1] for row in get_listening_minutes_daily(db)])
+
+
+def get_top_artists_past_week(db: mysql.connector.connection_cext.CMySQLConnection) -> list:
+    cursor = db.cursor()
+    query = f"""
+        SELECT
+            artists.name,
+            COUNT(1)
+        FROM
+            history
+        JOIN
+            track_artist
+        ON
+            history.track_id = track_artist.track_id
+            AND played > TIMESTAMP('{datetime.date.today() - datetime.timedelta(days=7)}')
+        JOIN
+            artists
+        ON
+            track_artist.artist_id = artists.artist_id
+        GROUP BY 1
+        ORDER BY 2 DESC
+        LIMIT 5"""
+    cursor.execute(query)
+    return cursor.fetchall()
+
+
+def get_top_genres_past_week(db: mysql.connector.connection_cext.CMySQLConnection) -> list:
+    cursor = db.cursor()
+    query = f"""
+        SELECT
+            genres.genre,
+            COUNT(1)
+        FROM
+            history
+        JOIN
+            track_artist
+        ON
+            history.track_id = track_artist.track_id
+            AND played > TIMESTAMP('{datetime.date.today() - datetime.timedelta(days=7)}')
+        JOIN
+            artist_genre
+        ON
+            track_artist.artist_id = artist_genre.artist_id
+        JOIN
+            genres
+        ON
+            artist_genre.genre_id = genres.genre_id
+        GROUP BY 1
+        ORDER BY 2 DESC
+        LIMIT 5"""
+    cursor.execute(query)
+    return cursor.fetchall()
